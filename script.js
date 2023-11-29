@@ -26,7 +26,7 @@ musicaFocoInput.addEventListener('change', () => {
 })
 
 focoBt.addEventListener('click', ()=>{
-  tempoDecorridoEmSegundos = 1500;
+  tempoDecorridoEmSegundos = 5;
   play.play();
   alterarContexto('foco');
   focoBt.classList.add('active');
@@ -79,10 +79,15 @@ function alterarContexto (contexto) {
 const contageRegresiva = () => {
 
   if(tempoDecorridoEmSegundos <= 0){
-   // beep.play()
-   alert('tempo finalizado');
-   zerar();
-   return;
+     // beep.play()
+     alert('tempo finalizado');
+     const focoActivo = html.getAttribute('data-contexto') == 'foco'
+    if(focoActivo){
+      const evento = new CustomEvent('focoFinalizado')
+      document.dispatchEvent(evento)
+    }
+     zerar();
+     return;
   }
 
   tempoDecorridoEmSegundos -= 1;

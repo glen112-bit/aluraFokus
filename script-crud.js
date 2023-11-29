@@ -3,8 +3,15 @@ const formAdicionarTarefa = document.querySelector('.app__form-add-task')
 const textArea = document.querySelector('.app__form-textarea');
 const ulTarefas = document.querySelector('.app__section-task-list')
 const btnCancel = document.querySelector('.app__form-footer__button--cancel')
+const paragrafoDescricaoTarefa = document.querySelector('.app__section-active-task-description')
 
-const tarefas = JSON.parse(localStorage.getItem('tarefas')) || [];
+const btnRemoverConcluidas = document.querySelector('#btn-remover-concluidas')
+const btnRemoverTodas = document.querySelector('#btn-remover-todas')
+
+let tarefas = JSON.parse(localStorage.getItem('tarefas')) || [];
+
+let tarefaSeleccionada = null;
+let liTarefaSeleccionada = null;
 
 function atualizarTarefas () {
   localStorage.setItem('tarefas', JSON.stringify(tarefas))
@@ -47,6 +54,29 @@ function criarElementoTarefa (tarefa) {
   li.append(paragrafo);
   li.append(btn);
 
+    if( tarefa.complete ){
+      li.classList.add('app__section-task-list-item-complete')
+      btn.setAttribute('disabled', 'true')
+    }else{
+    li.onclick = () => {
+      document.querySelectorAll('.app__section-task-list-item-active')
+         .forEach(elemento =>{
+            elemento.classList.remove('app__section-task-list-item-active')
+         })    
+      if(tarefaSeleccionada == tarefa){
+        paragrafoDescricaoTarefa = '';
+        tarefaSeleccionada = null;
+        liTarefaSeleccionada = null;
+        return
+      }
+      tarefaSeleccionada = tarefa
+      liTarefaSeleccionada = li
+      paragrafoDescricaoTarefa.textContent = tarefa.descricao
+      
+      // myLi.classList.toggle('active')
+      li.classList.add('app__section-task-list-item-active')
+    }
+  }
   return li
 };
 
@@ -75,4 +105,32 @@ tarefas.forEach(tarefa => {
 btnCancel.addEventListener('click', ()=>{
   textArea.value = '';
   formAdicionarTarefa.classList.add('hidden')
+})
+
+document.addEventListener('focoFinalizado', ()=>{
+  if(tarefaSeleccionada && liTarefaSeleccionada){
+    liTarefaSeleccionada.classList.remove('app__section-task-list-item-active')
+    liTarefaSeleccionada.classList.add('app__section-task-list-item-complete')
+    liTarefaSeleccionada.querySelector('button').setAttribute('disabled', 'true')
+    tarefaSeleccionada.complete = true;
+    atualizarTarefas();
+  }
+})
+
+btnRemoverConcluidas.addEventListener('click', ()=>{
+  const seletor = ".app__section-task-list-item-complete"
+  document.querySelectorAll(seletor).forEach(elemento => {
+    elemento.remove()
+  })
+  tarefas = tarefas.filter(tarefa => !tarefa.complete)
+  atualizarTarefas();
+})
+
+btnRemoverTodas.addEventListener('click', ()=>{
+  const seletor = '.app__section-task-list-item'
+  document.querySelectorAll(seletor).forEach(elemento =>{
+    elemento.remove()
+  })
+  console.log('remove')
+  atualizarTarefas();
 })
